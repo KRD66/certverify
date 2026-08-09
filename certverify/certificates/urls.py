@@ -7,7 +7,8 @@ from . import views
 urlpatterns = [
     path("", views.home_view, name="home"),
     path("search/", views.search_view, name= "search"),
-    path("verify/<uuid:cert_id>/", views.verify_view, name="verify")
-    
+    path("verify/<uuid:cert_id>/", views.verify_view, name="verify"),
+    path("api/certificates/",views.CertificateListView.as_view(),name="certificate-list"),
+    path("api/certificates/<uuid:pk>/", views.CertificateDetailView.as_view(), name="certificate-detail"),
     
 ]

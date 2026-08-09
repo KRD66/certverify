@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Certificate
+from rest_framework import generics
+from .serializer import CertificateSerializer
 
 
 def home_view(request):
@@ -17,7 +19,19 @@ def search_view(request):
 
 
 def verify_view(request,cert_id):
-    certificate = get_object_or_404
+    certificate = get_object_or_404(Certificate, id=cert_id)
     
+    return render(request, "certificates/verify.html", {"certificate": certificate})
+
+class CertificateListView(generics.ListCreateAPIView):
+    queryset =  Certificate.objects.all()
+    serializer_class = CertificateSerializer
     
-    return render(request, "Certificates/verify.html", {"certificate": certificate})
+ 
+class CertificateDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Certificate.objects.all()
+    serializer_class = CertificateSerializer
+        
+
+
+
