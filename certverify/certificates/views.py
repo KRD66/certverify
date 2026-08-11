@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Certificate
 from rest_framework import generics
 from .serializer import CertificateSerializer
+from django.urls import reverse
 
 
 def home_view(request):
@@ -32,6 +33,4 @@ class CertificateDetailView(generics.RetrieveUpdateAPIView):
     queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
         
-
-
 

@@ -9,6 +9,7 @@ class Certificate(models.Model):
     expiry_date = models.DateTimeField(null=True,blank=True)
     is_revoked = models.BooleanField(default = False)
     remarks = models.TextField(blank=True)
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     course = models.CharField(max_length=150)
