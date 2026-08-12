@@ -1,7 +1,7 @@
 from django.db import models
 import uuid 
 from django.utils import timezone
-
+from .utils import generate_qr_for_certificate
 class Certificate(models.Model):
     id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     recipient = models.CharField(max_length=100)
@@ -27,3 +27,12 @@ class Certificate(models.Model):
     def __str__(self):
         return f"{self.recipient} - {self.course} ({self.id})" 
             
+            
+            
+    def save(self, *args, **kwargs):
+     if not self.qr_code:
+        super().save(*args, **kwargs)
+        generate_qr_for_certificate(self)
+        super().save(update_fields=['qr_code'])
+     else:
+        super().save(*args, **kwargs)        
