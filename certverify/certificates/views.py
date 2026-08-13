@@ -3,6 +3,8 @@ from .models import Certificate
 from rest_framework import generics
 from .serializer import CertificateSerializer
 from django.urls import reverse
+from django.http import HttpResponse
+from .utils import generate_qr_for_certificate, generate_certificate_pdf
 
 
 def home_view(request):
@@ -32,5 +34,14 @@ class CertificateListView(generics.ListCreateAPIView):
 class CertificateDetailView(generics.RetrieveUpdateAPIView):
     queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
+    
+    
         
 
+def download_certificate_pdf(request, cert_id):
+    certificate = get_object_or_404(Certificate, id=cert_id)
+    buffer = generate_certificate_pdf(certificate)
+
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="certificate-{certificate.id}.pdf"'
+    return response
