@@ -11,4 +11,5 @@ urlpatterns = [
     path("api/certificates/",views.CertificateListView.as_view(),name="certificate-list"),
     path("api/certificates/<uuid:pk>/", views.CertificateDetailView.as_view(), name="certificate-detail"),
     path("download/<uuid:cert_id>/", views.download_certificate_pdf, name="download"),
+ 
 ]
