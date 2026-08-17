@@ -24,75 +24,141 @@ def generate_qr_for_certificate(certificate):
 
     certificate.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
 
-
 def generate_certificate_pdf(certificate):
     buffer = BytesIO()
     width, height = landscape(A4)
     pdf = canvas.Canvas(buffer, pagesize=landscape(A4))
+
     navy = HexColor("#1B3F8B")
     red = HexColor("#C1272D")
     ink = HexColor("#1A1A1A")
+    gray = HexColor("#555555")
 
-    pdf.setStrokeColor(navy)
-    pdf.setLineWidth(2)
-    pdf.rect(30, 30, width - 60, height - 60)
+    margin = 40
+    content_x = margin + 30
 
     pdf.setFillColor(red)
-    pdf.rect(30, 30, 10, height - 60, fill=1, stroke=0)
+    pdf.rect(margin, margin, 8, height - 2 * margin, fill=1, stroke=0)
     pdf.setFillColor(navy)
-    pdf.rect(40, 30, 3, height - 60, fill=1, stroke=0)
+    pdf.rect(margin + 8, margin, 3, height - 2 * margin, fill=1, stroke=0)
 
+    top_y = height - margin - 30
+
+    crest_cx, crest_cy = content_x + 18, top_y - 2
     pdf.setFillColor(navy)
-    pdf.setFont("Helvetica-Bold", 20)
-    pdf.drawString(70, height - 70, "CERTVERIFY")
+    pdf.circle(crest_cx, crest_cy, 20, fill=1, stroke=0)
+    pdf.setStrokeColor(red)
+    pdf.setLineWidth(2)
+    pdf.circle(crest_cx, crest_cy, 20, fill=0, stroke=1)
+    pdf.setFillColor(HexColor("#FFFFFF"))
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawCentredString(crest_cx, crest_cy - 5, "CV")
+
+    name_x = content_x + 50
+    pdf.setFillColor(navy)
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(name_x, top_y + 3, "CERTVERIFY CERTIFICATE")
+    pdf.drawString(name_x, top_y - 13, "REGISTRY")
+    pdf.setFont("Helvetica", 7.5)
+    pdf.setFillColor(gray)
+    pdf.drawString(name_x, top_y - 27, "Digitally issued and independently verifiable")
+
+    box_w, box_h = 180, 17
+    box_x = width - margin - 30 - box_w
+    pdf.setStrokeColor(ink)
+    pdf.setLineWidth(0.75)
+    pdf.rect(box_x, height - margin - 30, box_w, box_h, stroke=1, fill=0)
+    pdf.rect(box_x, height - margin - 51, box_w, box_h, stroke=1, fill=0)
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.setFillColor(ink)
+    pdf.drawString(box_x + 8, height - margin - 24, f"REF: {str(certificate.id)[:8].upper()}")
+    pdf.drawString(box_x + 8, height - margin - 45, f"DATE: {certificate.issue_date.strftime('%d %b %Y').upper()}")
+
+    addr_top = top_y - 65
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.setFillColor(ink)
+    pdf.drawString(content_x, addr_top, certificate.recipient.upper())
     pdf.setFont("Helvetica", 9)
-    pdf.setFillColor(ink)
-    pdf.drawString(70, height - 84, "Certificate Registry")
+    pdf.setFillColor(gray)
+    line = addr_top - 13
+    if certificate.matric_number:
+        pdf.drawString(content_x, line, f"Matric No: {certificate.matric_number}")
+        line -= 12
+    pdf.drawString(content_x, line, "Certificate Registry — CertVerify")
 
-    pdf.setStrokeColor(navy)
-    pdf.setLineWidth(1)
-    pdf.rect(width - 230, height - 90, 190, 20, stroke=1, fill=0)
-    pdf.setFont("Helvetica", 9)
+    title_y = addr_top - 55
+    pdf.setFont("Helvetica-Bold", 22)
     pdf.setFillColor(ink)
-    pdf.drawString(width - 222, height - 84, f"REF: {str(certificate.id)[:8].upper()}")
+    pdf.drawString(content_x, title_y, "CERTIFICATE OF COMPLETION")
+    pdf.setFillColor(red)
+    pdf.rect(content_x, title_y - 12, 230, 3, fill=1, stroke=0)
 
+    pdf.setFont("Helvetica", 10.5)
     pdf.setFillColor(ink)
-    pdf.setFont("Helvetica-Bold", 26)
-    pdf.drawCentredString(width / 2, height - 180, "Certificate of Completion")
-    pdf.setFont("Helvetica", 18)
-    pdf.drawCentredString(width / 2, height - 220, certificate.recipient)
-    pdf.setFont("Helvetica", 13)
-    pdf.drawCentredString(width / 2, height - 245, f"has completed {certificate.course}")
+    body_y = title_y - 40
+    pdf.drawString(content_x, body_y, "This is to certify that the above-named recipient has fulfilled the")
+    body_y -= 15
+    pdf.drawString(content_x, body_y, "requirements for completion, and has been awarded this certificate")
+    body_y -= 15
+    pdf.drawString(content_x, body_y, "in")
+    pdf.setFont("Helvetica-Bold", 10.5)
+    course_text = certificate.course
+    pdf.drawString(content_x + 14, body_y, course_text)
+    text_width = pdf.stringWidth(course_text, "Helvetica-Bold", 10.5)
+    pdf.setStrokeColor(ink)
+    pdf.setLineWidth(0.5)
+    pdf.line(content_x + 14, body_y - 3, content_x + 14 + max(text_width, 160), body_y - 3)
+    body_y -= 15
+    pdf.setFont("Helvetica", 10.5)
+    pdf.drawString(content_x, body_y, "This certificate is issued as an authentic, independently verifiable record.")
 
-    seal_x, seal_y = 110, 90
+    sig_y = margin + 130
+    pdf.setStrokeColor(gray)
+    pdf.setLineWidth(0.5)
+    pdf.line(content_x, sig_y, content_x + 170, sig_y)
+    pdf.setFont("Helvetica-Bold", 9)
+    pdf.setFillColor(ink)
+    pdf.drawString(content_x, sig_y - 13, "Registrar, CertVerify")
+    pdf.setFont("Helvetica", 8)
+    pdf.setFillColor(gray)
+    pdf.drawString(content_x, sig_y - 24, "For: Certificate Issuing Authority")
+
+    seal_x, seal_y = content_x + 28, sig_y - 62
     pdf.setStrokeColor(red)
     pdf.setLineWidth(1.5)
-    pdf.circle(seal_x, seal_y, 38, stroke=1, fill=0)
+    pdf.circle(seal_x, seal_y, 28, stroke=1, fill=0)
     pdf.setStrokeColor(navy)
-    pdf.circle(seal_x, seal_y, 32, stroke=1, fill=0)
+    pdf.circle(seal_x, seal_y, 23, stroke=1, fill=0)
     pdf.setFillColor(navy)
-    pdf.setFont("Helvetica-Bold", 8)
-    pdf.drawCentredString(seal_x, seal_y + 3, "VERIFIED")
-    pdf.setFont("Helvetica", 6)
-    pdf.drawCentredString(seal_x, seal_y - 7, "CERTVERIFY")
+    pdf.setFont("Helvetica-Bold", 7)
+    pdf.drawCentredString(seal_x, seal_y + 2, "VERIFIED")
+    pdf.setFont("Helvetica", 5)
+    pdf.drawCentredString(seal_x, seal_y - 6, "CERTVERIFY")
 
+    footer_y = margin + 30
+    pdf.setFont("Helvetica", 8.5)
     pdf.setFillColor(ink)
-    pdf.setFont("Helvetica", 9)
-    pdf.drawString(60, 65, f"Issued: {certificate.issue_date.strftime('%d %b %Y')}")
+    pdf.drawString(content_x, footer_y, f"Issued: {certificate.issue_date.strftime('%d %b %Y')}")
     expiry_text = certificate.expiry_date.strftime('%d %b %Y') if certificate.expiry_date else "Does not expire"
-    pdf.drawString(60, 52, f"Expires: {expiry_text}")
-    pdf.drawString(60, 39, f"Certificate ID: {certificate.id}")
+    pdf.drawString(content_x, footer_y - 12, f"Expires: {expiry_text}")
+    pdf.drawString(content_x, footer_y - 24, f"Certificate ID: {certificate.id}")
 
     if certificate.qr_code:
-        pdf.drawImage(certificate.qr_code.path, width - 160, 40, width=90, height=90)
-        pdf.setFont("Helvetica-Bold", 8)
+        qr_size = 80
+        qr_x = width - margin - 30 - qr_size
+        qr_y = margin + 30
+        pdf.drawImage(certificate.qr_code.path, qr_x, qr_y, width=qr_size, height=qr_size)
+        pdf.setFont("Helvetica-Bold", 7.5)
         pdf.setFillColor(navy)
-        pdf.drawCentredString(width - 115, 33, "Scan to verify")
+        pdf.drawCentredString(qr_x + qr_size / 2, qr_y - 11, "Scan to verify")
 
-    pdf.setFont("Helvetica", 7)
-    pdf.setFillColor(HexColor("#555555"))
+    bar_h = 20
+    pdf.setFillColor(red)
+    pdf.rect(margin, margin - bar_h - 6, width - 2 * margin, bar_h, fill=1, stroke=0)
+    pdf.setFillColor(HexColor("#FFFFFF"))
+    pdf.setFont("Helvetica-Bold", 7.5)
     verify_url = settings.SITE_DOMAIN + reverse("verify", args=[certificate.id])
-    pdf.drawCentredString(width / 2, 20, f"Verify at {verify_url}")
+    pdf.drawCentredString(width / 2, margin - bar_h + 3, f"Verify this certificate at {verify_url}")
 
     pdf.showPage()
     pdf.save()

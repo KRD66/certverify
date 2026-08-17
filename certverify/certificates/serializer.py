@@ -10,7 +10,7 @@ class CertificateSerializer(serializers.ModelSerializer):
         model = Certificate
         fields = [
     
-            'id', 'recipient', 'course', 'issue_date', 'expiry_date',
+            'id', 'recipient', 'course', 'matric_number', 'issue_date', 'expiry_date',
             'is_revoked', 'remarks','qr_code', 'is_valid', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
@@ -23,4 +23,4 @@ class CertificatePublicSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Certificate
-        fields = [' recipient', 'course', 'issue_date', 'expiry_date', 'is_valid']                
+        fields = fields = ['recipient', 'course', 'matric_number', 'issue_date', 'expiry_date', 'is_valid']
