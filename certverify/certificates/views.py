@@ -13,7 +13,7 @@ def home_view(request):
     return render(request, "certificates/home.html")
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def search_view(request):
     query = request.GET.get("q", "")
 
@@ -47,7 +47,7 @@ def download_certificate_pdf(request, cert_id):
     return response
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def issue_certificate_view(request):
     if request.method == "POST":
         form = CertificateIssueForm(request.POST)
