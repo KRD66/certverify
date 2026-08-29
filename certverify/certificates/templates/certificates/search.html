@@ -1,0 +1,203 @@
+{% extends "certificates/base.html" %}
+{% block title %}Search results — CertVerify{% endblock %}
+
+{% block extra_style %}
+  .results-wrap {
+    flex: 1;
+    padding: 48px clamp(20px, 5vw, 64px) 80px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .results-inner {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .results-header {
+    margin-bottom: 28px;
+  }
+
+  .results-header .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin: 0 0 10px;
+  }
+
+  .results-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4vw, 36px);
+    margin: 0 0 8px;
+  }
+
+  .results-header p {
+    color: rgba(247, 243, 232, 0.55);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .refine-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .refine-form input {
+    flex: 1;
+    background: rgba(247, 243, 232, 0.06);
+    border: 1px solid rgba(247, 243, 232, 0.16);
+    border-radius: 3px;
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+  }
+
+  .refine-form input::placeholder { color: rgba(247, 243, 232, 0.35); }
+
+  .refine-form button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--parchment);
+    border: 1px solid var(--blue);
+    border-radius: 3px;
+    padding: 0 22px;
+    cursor: pointer;
+  }
+
+  .ledger {
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px 22px;
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 0.15s ease;
+  }
+
+  .ledger-row:last-child { border-bottom: none; }
+  .ledger-row:hover { background: var(--parchment-soft); }
+
+  .ledger-recipient {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .ledger-course {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .ledger-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .status-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .status-valid { background: rgba(27, 122, 76, 0.12); color: var(--stamp-green); }
+  .status-invalid { background: rgba(193, 39, 45, 0.12); color: var(--stamp-red); }
+
+  .empty-state {
+    padding: 60px 24px;
+    text-align: center;
+    border: 1px dashed rgba(247, 243, 232, 0.25);
+    border-radius: 4px;
+  }
+
+  .empty-state h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+
+  .empty-state p {
+    color: rgba(247, 243, 232, 0.5);
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+
+  .empty-state a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid var(--red);
+    color: var(--red);
+    padding-bottom: 2px;
+  }
+
+  @media (max-width: 560px) {
+    .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+  }
+{% endblock %}
+
+{% block content %}
+<section class="results-wrap">
+  <div class="results-inner">
+
+    <div class="results-header">
+      <p class="eyebrow">Search results</p>
+      <h1>"{{ request.GET.q }}"</h1>
+      <p>{{ results|length }} certificate{{ results|length|pluralize }} found</p>
+    </div>
+
+    <form class="refine-form" action="{% url 'search' %}" method="get">
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Refine your search" autocomplete="off">
+      <button type="submit">Search</button>
+    </form>
+
+    {% if results %}
+      <div class="ledger parchment-panel">
+        {% for certificate in results %}
+          <a href="{% url 'verify' certificate.id %}" class="ledger-row">
+            <span class="ledger-recipient">{{ certificate.recipient }}</span>
+            <span class="ledger-course">{{ certificate.course }}</span>
+            <span class="ledger-date">{{ certificate.issue_date|date:"d M Y" }}</span>
+            {% if certificate.is_valid %}
+              <span class="status-tag status-valid">Valid</span>
+            {% else %}
+              <span class="status-tag status-invalid">Not valid</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h2>No matching certificates</h2>
+        <p>Double-check the spelling, or try searching with just the first or last name.</p>
+        <a href="{% url 'home' %}">Back to search</a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

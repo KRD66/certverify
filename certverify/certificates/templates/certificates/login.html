@@ -1,0 +1,135 @@
+{% extends "certificates/base.html" %}
+{% block title %}Staff Login — CertVerify{% endblock %}
+
+{% block extra_style %}
+  .login-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px clamp(20px, 5vw, 64px) 80px;
+  }
+
+  .login-inner {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .login-header .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin: 0 0 10px;
+  }
+
+  .login-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin: 0;
+  }
+
+  .login-form {
+    padding: 30px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+  }
+
+  .field input:focus {
+    border-color: var(--blue);
+  }
+
+  .login-error {
+    background: rgba(193, 39, 45, 0.08);
+    color: var(--red);
+    border: 1px solid rgba(193, 39, 45, 0.25);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    margin-bottom: 18px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .submit-btn:hover {
+    background: #16326e;
+  }
+{% endblock %}
+
+{% block content %}
+<section class="login-wrap">
+  <div class="login-inner">
+
+    <div class="login-header">
+      <p class="eyebrow">Registrar access</p>
+      <h1>Staff Login</h1>
+    </div>
+
+    <form class="login-form parchment-panel" method="post">
+      {% csrf_token %}
+
+      {% if form.errors %}
+        <div class="login-error">Incorrect username or password. Try again.</div>
+      {% endif %}
+
+      <div class="field">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="submit-btn">Log in</button>
+    </form>
+
+  </div>
+</section>
+{% endblock %}

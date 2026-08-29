@@ -1,0 +1,412 @@
+{% extends "certificates/base.html" %}
+{% block title %}{{ certificate.recipient }} — CertVerify{% endblock %}
+
+{% block extra_style %}
+  .verify-wrap {
+    flex: 1;
+    padding: 48px clamp(20px, 5vw, 64px) 80px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .letter-card {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .letter-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--red) 0 60%, var(--blue) 60% 100%);
+  }
+
+  .letter-inner {
+    padding: 36px 40px 32px 56px;
+  }
+
+  .letter-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+  }
+
+  .letter-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .letter-crest {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 2px solid var(--red);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .letter-brand-text .name {
+    font-family: 'Helvetica Neue', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    letter-spacing: 0.03em;
+    color: var(--blue);
+    text-transform: uppercase;
+  }
+
+  .letter-brand-text .tagline {
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .letter-refs {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .letter-refs .ref-box {
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .recipient-block {
+    margin-bottom: 22px;
+  }
+
+  .recipient-block .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+
+  .recipient-block .sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .letter-title {
+    font-family: 'Helvetica Neue', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+
+  .letter-title-bar {
+    width: 160px;
+    height: 3px;
+    background: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .letter-body {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    margin-bottom: 26px;
+  }
+
+  .letter-body .course-fill {
+    font-weight: 700;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+  }
+
+  .letter-status-note {
+    padding: 14px 16px;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 26px;
+  }
+
+  .note-valid { background: rgba(27, 122, 76, 0.08); color: var(--stamp-green); border: 1px solid rgba(27, 122, 76, 0.25); }
+  .note-invalid { background: rgba(193, 39, 45, 0.08); color: var(--stamp-red); border: 1px solid rgba(193, 39, 45, 0.25); }
+
+  .letter-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .sig-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .stamp {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-shrink: 0;
+    animation: stamp-down 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2) 0.15s both;
+  }
+
+  .stamp-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+  }
+
+  .stamp-ring::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.6;
+  }
+
+  .stamp-wrap { position: relative; width: 78px; height: 78px; }
+
+  .stamp-text {
+    position: relative;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .stamp-valid { color: var(--stamp-green); }
+  .stamp-invalid { color: var(--stamp-red); }
+
+  @keyframes stamp-down {
+    0% { transform: scale(2.4); opacity: 0; }
+    60% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .sig-text .role {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .sig-text .sub {
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .meta-list {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .qr-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .qr-block img {
+    width: 68px;
+    height: 68px;
+    display: block;
+  }
+
+  .qr-block span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .letter-bar {
+    background: var(--red);
+    color: #fff;
+    font-size: 10.5px;
+    text-align: center;
+    padding: 10px 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .verify-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .btn-download {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--blue);
+    color: #fff;
+    padding: 12px 26px;
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  .btn-download:hover { background: #16326e; }
+
+  .verify-actions a.link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(247, 243, 232, 0.65);
+    border-bottom: 1px solid rgba(247, 243, 232, 0.3);
+    padding-bottom: 2px;
+  }
+
+  .verify-actions a.link:hover { color: var(--red); border-color: var(--red); }
+
+  @media (max-width: 600px) {
+    .letter-header { flex-direction: column; }
+    .letter-refs { text-align: left; }
+    .letter-footer { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .meta-list { text-align: left; }
+  }
+{% endblock %}
+
+{% block content %}
+<section class="verify-wrap">
+  <div style="width:100%; max-width:700px;">
+
+    <article class="letter-card parchment-panel">
+      <div class="letter-accent"></div>
+      <div class="letter-inner">
+
+        <div class="letter-header">
+          <div class="letter-brand">
+            <div class="letter-crest">CV</div>
+            <div class="letter-brand-text">
+              <div class="name">CertVerify Certificate Registry</div>
+              <div class="tagline">Digitally issued and independently verifiable</div>
+            </div>
+          </div>
+          <div class="letter-refs">
+            <div class="ref-box">REF: {{ certificate.id|slice:":8"|upper }}</div>
+            <div class="ref-box">DATE: {{ certificate.issue_date|date:"d M Y"|upper }}</div>
+          </div>
+        </div>
+
+        <div class="recipient-block">
+          <p class="name">{{ certificate.recipient }}</p>
+          {% if certificate.matric_number %}
+            <p class="sub">Matric No: {{ certificate.matric_number }}</p>
+          {% endif %}
+        </div>
+
+        <p class="letter-title">Certificate of Completion</p>
+        <div class="letter-title-bar"></div>
+
+        <p class="letter-body">
+          This is to certify that the above-named recipient has fulfilled the requirements
+          for completion, and has been awarded this certificate in
+          <span class="course-fill">{{ certificate.course }}</span>.
+          This certificate is issued as an authentic, independently verifiable record.
+        </p>
+
+        {% if certificate.is_valid %}
+          <div class="letter-status-note note-valid">
+            This certificate is genuine and currently valid. It matches our records exactly.
+          </div>
+        {% elif certificate.is_revoked %}
+          <div class="letter-status-note note-invalid">
+            This certificate has been revoked and is no longer valid, though it was genuinely issued.
+          </div>
+        {% else %}
+          <div class="letter-status-note note-invalid">
+            This certificate has passed its expiry date and is no longer valid.
+          </div>
+        {% endif %}
+
+        <div class="letter-footer">
+          <div class="sig-block">
+            <div class="stamp-wrap">
+              <div class="stamp {% if certificate.is_valid %}stamp-valid{% else %}stamp-invalid{% endif %}">
+                <div class="stamp-ring"></div>
+                <span class="stamp-text">
+                  {% if certificate.is_valid %}Verified<br>Valid{% elif certificate.is_revoked %}Revoked{% else %}Expired{% endif %}
+                </span>
+              </div>
+            </div>
+            <div class="sig-text">
+              <div class="role">Registrar, CertVerify</div>
+              <div class="sub">For: Certificate Issuing Authority</div>
+            </div>
+          </div>
+          <div class="meta-list">
+            <div>ISSUED: {{ certificate.issue_date|date:"d M Y" }}</div>
+            <div>EXPIRES: {% if certificate.expiry_date %}{{ certificate.expiry_date|date:"d M Y" }}{% else %}NONE{% endif %}</div>
+            <div>ID: {{ certificate.id }}</div>
+          </div>
+
+          {% if certificate.qr_code %}
+          <div class="qr-block">
+            <img src="{{ certificate.qr_code.url }}" alt="Verification QR code">
+            <span>Scan to verify</span>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <div class="letter-bar">
+        Verify this certificate at {{ request.scheme }}://{{ request.get_host }}{% url 'verify' certificate.id %}
+      </div>
+    </article>
+
+    <div class="verify-actions">
+      <a href="{% url 'download' cert_id=certificate.id %}" class="btn-download">Download PDF</a>
+      <a href="{% url 'home' %}" class="link">Verify another certificate</a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

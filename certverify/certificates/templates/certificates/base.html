@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}CertVerify{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0F1F45;
+    --ink-soft: #1B3F8B;
+    --parchment: #F7F3E8;
+    --parchment-soft: #EFE8D6;
+    --blue: #1B3F8B;
+    --red: #C1272D;
+    --gold: #1B3F8B;
+    --stamp-red: #C1272D;
+    --stamp-green: #1B7A4C;
+    --muted: #6E6558;
+    --border: rgba(16, 24, 43, 0.14);
+    --border-soft: rgba(16, 24, 43, 0.08);
+    --shadow: 0 20px 40px -20px rgba(16, 24, 43, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(193, 39, 45, 0.10), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(27, 63, 139, 0.18), transparent 45%);
+    color: var(--parchment);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a { color: inherit; }
+  .site-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px clamp(20px, 5vw, 64px) 20px;
+    border-bottom: 1px solid rgba(247, 243, 232, 0.1);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--red) 0 60%, var(--blue) 60% 100%);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    padding-left: 18px;
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--parchment);
+    position: relative;
+  }
+  .brand-mark::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(27, 63, 139, 0.7);
+    border-radius: 50%;
+  }
+  .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .brand-tagline {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(247, 243, 232, 0.45);
+    margin-top: 2px;
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(247, 243, 232, 0.65);
+    border: 1px solid rgba(247, 243, 232, 0.18);
+    padding: 8px 16px;
+    border-radius: 999px;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .site-nav a:hover {
+    border-color: var(--red);
+    color: var(--parchment);
+  }
+  .site-nav a.nav-login {
+    border-color: var(--red);
+    color: var(--parchment);
+  }
+  .staff-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(247, 243, 232, 0.4);
+    margin-right: 4px;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .site-footer {
+    padding: 24px clamp(20px, 5vw, 64px);
+    border-top: 1px solid rgba(247, 243, 232, 0.1);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(247, 243, 232, 0.35);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .parchment-panel {
+    background: var(--parchment);
+    color: var(--ink);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+  {% block extra_style %}{% endblock %}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="{% url 'home' %}" class="brand">
+      <span class="brand-mark">CV</span>
+      <span>
+        <span class="brand-name">CertVerify</span>
+        <span class="brand-tagline">Certificate Registry</span>
+      </span>
+    </a>
+    <nav class="site-nav">
+      <a href="{% url 'home' %}">Home</a>
+      {% if user.is_staff %}
+        <a href="{% url 'issue' %}">Issue a certificate</a>
+        <span class="staff-name">{{ user.username }}</span>
+        <a href="{% url 'logout' %}">Log out</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="nav-login">Staff Login</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <span>CertVerify — issued credentials, verified on record</span>
+    <span>No account required to verify</span>
+  </footer>
+</body>
+</html>
